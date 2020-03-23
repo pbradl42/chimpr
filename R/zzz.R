@@ -9,13 +9,35 @@ chimpr_ua <- function() {
   paste0(versions, collapse = " ")
 }
 
-chmp_GET <- function(dc = "us7", path, key, query = list(), ...){
+chmp_client <- function(dc = "us7", path, key, query = list(), ...) {
   cli <- crul::HttpClient$new(
     url = chmp_base(dc),
     opts = c(list(useragent = chimpr_ua()), ...),
     auth = crul::auth(user = "anystring", pwd = key)
     # auth = crul::auth(user = "anystring", pwd = check_key(key))
   )
+  return(cli)
+}
+chmp_PATCH <- function(dc = "us7", path, key, query = list(), ...) {
+  cli <- chmp_client(dc, path, key, query = list(), ...)
+  temp <- cli$patch(
+    path = file.path("3.0", path), 
+    query = query)
+  err_catcher(temp)
+  x <- temp$parse("UTF-8")
+  return(x)
+}
+chmp_PUT <- function(dc = "us7", path, key, query = list(), ...) {
+  cli <- chmp_client(dc, path, key, query = list(), ...)
+  temp <- cli$put(
+    path = file.path("3.0", path), 
+    query = query)
+  err_catcher(temp)
+  x <- temp$parse("UTF-8")
+  return(x)
+}
+chmp_GET <- function(dc = "us7", path, key, query = list(), ...){
+  cli <- chmp_client(dc, path, key, query = list(), ...)
   temp <- cli$get(
     path = file.path("3.0", path), 
     query = query)
